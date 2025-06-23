@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Portfolio Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    ul {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      list-style-type: none;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    li {
+      margin-bottom: 20px;
+      line-height: 1.6;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Latest Trades</h1>
+  <ul id="trade-list">Loading...</ul>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAn4u8Qb1OCLB50b8geoYHSMOg8rWLBSk8",
+      authDomain: "financial-portfolio-mana-b8dee.firebaseapp.com",
+      projectId: "financial-portfolio-mana-b8dee",
+      storageBucket: "financial-portfolio-mana-b8dee.appspot.com",
+      messagingSenderId: "491583399406",
+      appId: "1:491583399406:web:651ec64e690d5b74d15aff",
+      measurementId: "G-NZ04EHQEC8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    const db = firebase.firestore();
+
+    const tradeList = document.getElementById("trade-list");
+
+    db.collection("trades").orderBy("timestamp", "desc").limit(5)
+      .onSnapshot(snapshot => {
+        tradeList.innerHTML = "";
+        if (snapshot.empty) {
+          tradeList.innerHTML = "<li>No trades recorded yet.</li>";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const time = data.timestamp?.seconds
+            ? new Date(data.timestamp.seconds * 1000).toLocaleString()
+            : "Unknown time";
+
+          const buy = data.buy?.join(', ') || "None";
+          const sell = data.sell?.join(', ') || "None";
+
+          tradeList.innerHTML += `<li>
+            🕒 <strong>${time}</strong><br>
+            🔼 <strong>Buy:</strong> ${buy}<br>
+            🔽 <strong>Sell:</strong> ${sell}
+          </li>`;
+        });
+      });
+  </script>
+</body>
+</html>
