@@ -1,0 +1,36 @@
+name: Run Portfolio Agents Daily
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # every day at 6 AM UTC
+  workflow_dispatch:      # allows manual trigger too
+
+jobs:
+  run-agents:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          python -m textblob.download_corpora
+
+      - name: Run News Agent
+        run: python agents/news_monitor.py
+
+      - name: Run Risk Agent
+        run: python agents/risk_analysis.py
+
+      - name: Run Rebalancer
+        run: python agents/rebalancer.py
+
+      - name: Run Trade Executor
+        run: python agents/trade_executor.py
